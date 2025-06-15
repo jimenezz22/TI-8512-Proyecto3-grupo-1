@@ -5,8 +5,8 @@ import {
   JoinTable,
   Index,
 } from 'typeorm';
-import { BaseEntity } from '@/shared/entities/base.entity';
-import { Movie } from '@/movies/entities/movie.entity';
+import { BaseEntity } from '../../shared/entities/base.entity';
+import { Movie } from '../../movies/entities/movie.entity';
 
 @Entity('characters')
 @Index(['name'], { unique: true })

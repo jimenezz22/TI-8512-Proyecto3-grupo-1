@@ -4,8 +4,8 @@ import {
   ManyToMany,
   Index,
 } from 'typeorm';
-import { BaseEntity } from '@/shared/entities/base.entity';
-import { Character } from '@/characters/entities/character.entity';
+import { BaseEntity } from '../../shared/entities/base.entity';
+import { Character } from '../../characters/entities/character.entity';
 
 @Entity('movies')
 @Index(['title'], { unique: true })
