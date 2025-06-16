@@ -4,17 +4,13 @@ import {
   IsOptional,
   MaxLength,
   MinLength,
+  IsArray,
+  IsNumber,
+  ArrayUnique,
 } from 'class-validator';
-import { Transform } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 
 export class CreateCharacterDto {
-  @ApiProperty({
-    description: 'Character name',
-    example: 'Luke Skywalker',
-    minLength: 2,
-    maxLength: 100,
-  })
   @IsString()
   @IsNotEmpty()
   @MinLength(2)
@@ -22,25 +18,22 @@ export class CreateCharacterDto {
   @Transform(({ value }) => value?.trim())
   name: string;
 
-  @ApiPropertyOptional({
-    description: 'Character height in cm',
-    example: '172',
-    maxLength: 20,
-  })
   @IsString()
   @IsOptional()
   @MaxLength(20)
   @Transform(({ value }) => value?.trim())
   height?: string;
 
-  @ApiPropertyOptional({
-    description: 'Character mass in kg',
-    example: '77',
-    maxLength: 20,
-  })
   @IsString()
   @IsOptional()
   @MaxLength(20)
   @Transform(({ value }) => value?.trim())
   mass?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsNumber({}, { each: true })
+  @Type(() => Number)
+  movieIds?: number[];
 }
