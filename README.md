@@ -6,304 +6,421 @@
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/postgresql-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![Swagger](https://img.shields.io/badge/-Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)
 
 **Una API robusta de StarWars construida con NestJS y TypeORM**
 
 Proyecto académico para el curso TI-8512 - Diseño de Aplicaciones Web
+**Grupo 1 - StarWars API**
 
 </div>
+
+---
 
 ## 📋 Tabla de Contenidos
 
 - [Características](#-características)
+- [Demo Rápido](#-demo-rápido)
+- [Arquitectura del Proyecto](#-arquitectura-del-proyecto)
 - [Requisitos Previos](#-requisitos-previos)
 - [Instalación](#-instalación)
 - [Configuración](#-configuración)
 - [Ejecución](#-ejecución)
-- [Verificación](#-verificación)
-- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Endpoints de la API](#-endpoints-de-la-api)
+- [Ejemplos de Uso](#-ejemplos-de-uso)
+- [Manejo de Errores](#-manejo-de-errores)
+- [Documentación Swagger](#-documentación-swagger)
+- [Modelo de Datos](#-modelo-de-datos)
 - [Tecnologías](#-tecnologías)
 - [Scripts Disponibles](#-scripts-disponibles)
-- [Solución de Problemas](#-solución-de-problemas)
-- [Próximos Pasos](#-próximos-pasos)
+- [Testing](#-testing)
+- [Desarrollo](#-desarrollo)
+- [Contribución](#-contribución)
+
+---
 
 ## ✨ Características
 
-- 🏗️ **Arquitectura modular** con NestJS
-- 🗄️ **Base de datos PostgreSQL** con TypeORM
-- 🐳 **Dockerizado** para desarrollo local
-- 🔄 **Migraciones** para control de versiones de BD
-- 🌱 **Seeds** con datos de StarWars precargados
-- 🔗 **Relaciones Many-to-Many** entre Characters y Movies
-- ✅ **Validaciones** con class-validator
-- 📊 **pgAdmin** incluido para gestión de BD
+### 🏗️ **Arquitectura Robusta**
+- **NestJS** con arquitectura modular y separación de responsabilidades
+- **TypeORM** para manejo de base de datos con migraciones
+- **PostgreSQL** como base de datos relacional
+- **Docker** para ambiente de desarrollo consistente
+
+### 🔗 **Relaciones Many-to-Many**
+- Implementación completa de relaciones N:N entre Characters y Movies
+- Validaciones de integridad referencial
+- Endpoints especializados para manejo de relaciones
+
+### ⚠️ **Manejo Profesional de Errores**
+- **404** (Not Found) - Entidades inexistentes
+- **400** (Bad Request) - Datos inválidos o relaciones incorrectas
+- **403** (Forbidden) - Eliminación de entidades con dependencias
+- **409** (Conflict) - Violación de constrains únicos
+
+### 📚 **Documentación Completa**
+- **Swagger UI** integrado con ejemplos y esquemas
+- **README** detallado con instrucciones paso a paso
+- **Código autodocumentado** con comentarios descriptivos
+
+### ✅ **Validaciones Robustas**
+- **class-validator** para validación de DTOs
+- **Regex patterns** para formatos específicos
+- **Validación de arrays** con límites y unicidad
+
+### 🌱 **Datos de Ejemplo**
+- **Seed data** con personajes y películas de StarWars
+- **Relaciones precargadas** para testing inmediato
+- **Migraciones** versionadas para control de cambios
+
+---
+
+## 🚀 Demo Rápido
+
+```bash
+# Clonar e instalar
+git clone <repository-url>
+cd backend
+npm install
+
+# Levantar con Docker
+npm run docker:up
+npm run migration:run
+npm run seed
+
+# Ejecutar API
+npm run start:dev
+
+# Probar endpoints
+curl http://localhost:3000/api/v1/characters
+curl http://localhost:3000/api/v1/characters/1/movies
+```
+
+**🎯 Resultado:** API completa funcionando en 2 minutos con datos de StarWars precargados.
+
+---
+
+## 🏛️ Arquitectura del Proyecto
+
+### **Patrón de Diseño**
+```
+Controllers → Services → Repositories → Database
+     ↓           ↓           ↓
+   HTTP       Business    Data Access
+  Requests     Logic      Layer
+```
+
+### **Módulos Implementados**
+- **CharactersModule** - Gestión completa de personajes
+- **MoviesModule** - Gestión completa de películas  
+- **DatabaseModule** - Configuración de conexión TypeORM
+- **CommonModule** - Filtros globales y pipes de validación
+
+### **Características Técnicas**
+- **Dependency Injection** de NestJS
+- **Repository Pattern** con TypeORM
+- **DTO Pattern** para validación y serialización
+- **Global Exception Filters** para manejo de errores
+- **Custom Validation Pipes** para requests
+
+---
 
 ## 🔧 Requisitos Previos
 
-Antes de comenzar, asegúrate de tener instalado:
+### **Software Requerido**
+- **Node.js** ≥ 18.0.0
+- **npm** ≥ 9.0.0
+- **Docker Desktop** 
+- **Git** para control de versiones
 
-- **Node.js** (versión 18 o superior)
-- **npm** (viene con Node.js)
-- **Docker Desktop** ([Descargar aquí](https://www.docker.com/products/docker-desktop/))
-- **Git** (para control de versiones)
-
-### Verificar instalaciones:
+### **Verificación de Instalación**
 ```bash
-node --version    # v18.0.0 o superior
-npm --version     # 9.0.0 o superior  
-docker --version  # 20.0.0 o superior
-git --version     # 2.0.0 o superior
+node --version    # v18.0.0+
+npm --version     # 9.0.0+
+docker --version  # 20.0.0+
+git --version     # 2.0.0+
 ```
+
+---
 
 ## 📦 Instalación
 
-### 1. Clonar el repositorio
+### **1. Clonar Repositorio**
 ```bash
-git clone <URL_DEL_REPOSITORIO>
+git clone <REPOSITORY_URL>
 cd backend
 ```
 
-### 2. Instalar dependencias
+### **2. Instalar Dependencias**
 ```bash
 npm install
 ```
 
-### 3. Configurar variables de entorno
+### **3. Configurar Variables de Entorno**
 ```bash
-# Copiar archivo de ejemplo
 cp .env.example .env
-
-# El archivo .env ya viene configurado correctamente:
-# DATABASE_HOST=localhost
-# DATABASE_PORT=5432
-# DATABASE_USERNAME=starwars_user
-# DATABASE_PASSWORD=starwars_password
-# DATABASE_NAME=starwars_db
-# PORT=3000
-# NODE_ENV=development
-# TYPEORM_SYNCHRONIZE=true
-# TYPEORM_LOGGING=true
 ```
+
+**Archivo `.env` preconfigurado:**
+```env
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USERNAME=starwars_user
+DATABASE_PASSWORD=starwars_password
+DATABASE_NAME=starwars_db
+PORT=3000
+NODE_ENV=development
+TYPEORM_SYNCHRONIZE=true
+TYPEORM_LOGGING=true
+```
+
+---
 
 ## 🚀 Configuración
 
-### 1. Levantar la base de datos con Docker
+### **1. Levantar Base de Datos**
 ```bash
-# Iniciar contenedores de PostgreSQL y pgAdmin
 npm run docker:up
-
-# Verificar que los contenedores estén corriendo
-docker ps
 ```
 
-**Deberías ver:**
-```
-CONTAINER ID   IMAGE                   PORTS                           NAMES
-xxxxxxxxx      postgres:15-alpine      0.0.0.0:5432->5432/tcp          starwars-postgres
-xxxxxxxxx      dpage/pgadmin4:latest   0.0.0.0:8080->80/tcp            starwars-pgadmin
-```
+**Servicios disponibles:**
+- **PostgreSQL:** `localhost:5432`
+- **pgAdmin:** `http://localhost:8080`
 
-### 2. Ejecutar migraciones
+### **2. Ejecutar Migraciones**
 ```bash
-# Crear las tablas en la base de datos
 npm run migration:run
 ```
 
-**Salida esperada:**
-```
-Migration InitialSchema1718000000001 has been executed successfully.
-```
-
-### 3. Cargar datos de ejemplo
+### **3. Cargar Datos de Ejemplo**
 ```bash
-# Insertar personajes y películas de StarWars
 npm run seed
 ```
 
-**Salida esperada:**
-```
-🌱 Starting seed process...
-✅ Seeded 6 movies and 6 characters
-✅ Seed completed successfully!
-```
+**Datos cargados:**
+- 6 personajes de StarWars
+- 6 películas de la saga
+- Relaciones N:N preconfiguradas
+
+---
 
 ## ▶️ Ejecución
 
-### Ejecutar la aplicación
+### **Modo Desarrollo**
 ```bash
-# Modo desarrollo (con hot reload)
 npm run start:dev
 ```
 
-**Salida esperada:**
-```
-[Nest] Starting Nest application...
-[Nest] Nest application successfully started
-🚀 StarWars API running on: http://localhost:3000/api/v1
-📊 Environment: development
-```
+### **Accesos Disponibles**
+- **API:** http://localhost:3000/api/v1
+- **Swagger:** http://localhost:3000/api/v1/docs
+- **pgAdmin:** http://localhost:8080
 
-## ✅ Verificación
+**Credenciales pgAdmin:**
+- Email: `admin@starwars.com`
+- Password: `admin123`
 
-### 1. Verificar que la API esté funcionando
+---
+
+## 🛠️ Endpoints de la API
+
+### **Characters**
 ```bash
-# En otra terminal, probar la API
-curl http://localhost:3000/api/v1
-
-# Respuesta esperada:
-StarWars API is running! 🚀
+GET    /api/v1/characters              # Listar todos los personajes
+GET    /api/v1/characters/:id          # Obtener personaje específico
+POST   /api/v1/characters              # Crear nuevo personaje
+PUT    /api/v1/characters/:id          # Actualizar personaje
+DELETE /api/v1/characters/:id          # Eliminar personaje
+GET    /api/v1/characters/:id/movies   # Películas del personaje ⭐
 ```
 
-### 2. Acceder a pgAdmin
-1. **Abrir navegador:** http://localhost:8080
-2. **Credenciales:**
-   - Email: `admin@starwars.com`
-   - Password: `admin123`
+### **Movies**
+```bash
+GET    /api/v1/movies                  # Listar todas las películas
+GET    /api/v1/movies/:id              # Obtener película específica
+POST   /api/v1/movies                  # Crear nueva película
+PUT    /api/v1/movies/:id              # Actualizar película
+DELETE /api/v1/movies/:id              # Eliminar película
+GET    /api/v1/movies/:id/characters   # Personajes de la película ⭐
+```
 
-### 3. Conectar pgAdmin a PostgreSQL
-1. **Click derecho en "Servers"** → "Register" → "Server"
-2. **General tab:**
-   - Name: `StarWars DB`
-3. **Connection tab:**
-   - Host: `starwars-postgres`
-   - Port: `5432`
-   - Database: `starwars_db`
-   - Username: `starwars_user`
-   - Password: `starwars_password`
+### **Gestión de Relaciones**
+```bash
+POST   /api/v1/characters/:characterId/movies/:movieId     # Agregar relación
+DELETE /api/v1/characters/:characterId/movies/:movieId     # Quitar relación
+POST   /api/v1/movies/:movieId/characters/:characterId     # Agregar relación
+DELETE /api/v1/movies/:movieId/characters/:characterId     # Quitar relación
+```
 
-### 4. Verificar datos en la base de datos
+---
+
+## 💡 Ejemplos de Uso
+
+### **Crear Personaje con Películas**
+```bash
+curl -X POST http://localhost:3000/api/v1/characters \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Han Solo",
+    "height": "180",
+    "mass": "80",
+    "movieIds": [1, 2, 3]
+  }'
+```
+
+### **Obtener Películas de un Personaje**
+```bash
+curl -X GET http://localhost:3000/api/v1/characters/1/movies
+```
+
+**Respuesta:**
+```json
+[
+  {
+    "id": 1,
+    "title": "A New Hope",
+    "episode_id": 4,
+    "director": "George Lucas"
+  },
+  {
+    "id": 2,
+    "title": "The Empire Strikes Back",
+    "episode_id": 5,
+    "director": "Irvin Kershner"
+  }
+]
+```
+
+### **Crear Película con Personajes**
+```bash
+curl -X POST http://localhost:3000/api/v1/movies \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "The Force Awakens",
+    "episode_id": 7,
+    "director": "J.J. Abrams",
+    "characterIds": [1, 3]
+  }'
+```
+
+---
+
+## ⚠️ Manejo de Errores
+
+### **404 - Not Found**
+```json
+{
+  "statusCode": 404,
+  "timestamp": "2024-06-16T04:30:00.000Z",
+  "path": "/api/v1/characters/999",
+  "method": "GET",
+  "error": "Not Found",
+  "message": "Character with ID 999 not found"
+}
+```
+
+### **400 - Bad Request**
+```json
+{
+  "statusCode": 400,
+  "timestamp": "2024-06-16T04:30:00.000Z",
+  "path": "/api/v1/characters",
+  "method": "POST",
+  "error": "Bad Request",
+  "message": "Movies not found with IDs: 999, 888"
+}
+```
+
+### **403 - Forbidden**
+```json
+{
+  "statusCode": 403,
+  "timestamp": "2024-06-16T04:30:00.000Z",
+  "path": "/api/v1/characters/1",
+  "method": "DELETE",
+  "error": "Forbidden",
+  "message": "Cannot delete character \"Luke Skywalker\" because it is associated with 3 movie(s). Remove the associations first."
+}
+```
+
+### **409 - Conflict**
+```json
+{
+  "statusCode": 409,
+  "timestamp": "2024-06-16T04:30:00.000Z",
+  "path": "/api/v1/characters",
+  "method": "POST",
+  "error": "Conflict",
+  "message": "Character with name \"Luke Skywalker\" already exists"
+}
+```
+
+---
+
+## 📚 Documentación Swagger
+
+**Acceso:** http://localhost:3000/api/v1/docs
+
+### **Características de la Documentación**
+- **Esquemas completos** de request/response
+- **Ejemplos interactivos** para cada endpoint
+- **Códigos de error** documentados
+- **Validaciones** explicadas
+- **Try it out** funcional para testing
+
+### **Navegación por Tags**
+- **Characters** - Endpoints de personajes
+- **Movies** - Endpoints de películas
+
+---
+
+## 🗄️ Modelo de Datos
+
+### **Entidades Principales**
+
+#### **Characters**
 ```sql
--- Ver todas las películas
-SELECT * FROM movies ORDER BY episode_id;
-
--- Ver todos los personajes
-SELECT * FROM characters ORDER BY name;
-
--- Ver relaciones (qué personajes aparecen en cada película)
-SELECT 
-  c.name as character_name,
-  m.title as movie_title,
-  m.episode_id
-FROM character_movies cm
-JOIN characters c ON c.id = cm.character_id
-JOIN movies m ON m.id = cm.movie_id
-ORDER BY m.episode_id, c.name;
+characters
+├── id (PK, auto-increment)
+├── name (varchar(100), unique, required)
+├── height (varchar(20), optional)
+├── mass (varchar(20), optional)
+├── createdAt (timestamp)
+├── updatedAt (timestamp)
+└── deletedAt (timestamp, soft delete)
 ```
 
-## 📁 Estructura del Proyecto
-
-```
-backend/
-├── src/
-│   ├── characters/
-│   │   ├── entities/
-│   │   │   └── character.entity.ts     
-│   │   └── dto/
-│   │       ├── create-character.dto.ts
-│   │       ├── update-character.dto.ts
-│   │       └── character-response.dto.ts
-│   ├── movies/
-│   │   ├── entities/
-│   │   │   └── movie.entity.ts         
-│   │   └── dto/
-│   │       ├── create-movie.dto.ts
-│   │       ├── update-movie.dto.ts
-│   │       └── movie-response.dto.ts
-│   ├── database/
-│   │   ├── migrations/
-│   │   │   └── 1718000000001-InitialSchema.ts
-│   │   ├── seeds/
-│   │   │   └── starwars-data.seed.ts
-│   │   └── seed.ts
-│   ├── shared/
-│   │   └── entities/
-│   │       └── base.entity.ts          # Entidad base con timestamps
-│   ├── config/
-│   │   ├── app.config.ts
-│   │   ├── database.config.ts
-│   │   └── database-cli.config.ts
-│   ├── app.module.ts
-│   └── main.ts
-├── docker/
-│   └── postgres/
-│       └── init.sql
-├── docker-compose.yml
-├── .env
-├── .env.example
-├── .eslintrc.js
-├── .prettierrc
-└── package.json
+#### **Movies**
+```sql
+movies
+├── id (PK, auto-increment)
+├── title (varchar(200), unique, required)
+├── episode_id (integer, unique, optional)
+├── director (varchar(100), optional)
+├── createdAt (timestamp)
+├── updatedAt (timestamp)
+└── deletedAt (timestamp, soft delete)
 ```
 
-## 🛠️ Tecnologías
-
-### Backend
-- **NestJS** - Framework de Node.js
-- **TypeScript** - Lenguaje de programación
-- **TypeORM** - ORM para base de datos
-- **PostgreSQL** - Base de datos relacional
-- **class-validator** - Validaciones de DTOs
-- **class-transformer** - Transformación de datos
-
-### DevOps
-- **Docker** - Contenedorización
-- **Docker Compose** - Orquestación de contenedores
-- **ESLint** - Linting de código
-- **Prettier** - Formateo de código
-
-### Herramientas
-- **pgAdmin** - Administración de PostgreSQL
-- **ts-node** - Ejecución de TypeScript
-
-## 📜 Scripts Disponibles
-
-```bash
-# Desarrollo
-npm run start:dev         # Ejecutar en modo desarrollo
-npm run start:prod        # Ejecutar en modo producción
-npm run build             # Compilar proyecto
-
-# Base de datos
-npm run migration:run     # Ejecutar migraciones
-npm run migration:revert  # Revertir última migración
-npm run seed              # Cargar datos de ejemplo
-
-# Docker
-npm run docker:up         # Levantar contenedores
-npm run docker:down       # Bajar contenedores
-npm run docker:logs       # Ver logs de contenedores
-
-# Calidad de código
-npm run lint              # Ejecutar linting
-npm run format            # Formatear código
-npm run test              # Ejecutar tests
+#### **Relación Many-to-Many**
+```sql
+character_movies
+├── character_id (FK → characters.id)
+├── movie_id (FK → movies.id)
+├── PK: (character_id, movie_id)
+├── ON DELETE CASCADE
+└── Índices optimizados
 ```
 
-## 🗄️ Modelo de Base de Datos
+### **Datos Precargados**
 
-### Entidades
-
-#### Characters
-- `id` (PK, auto-increment)
-- `name` (varchar, unique)
-- `height` (varchar, nullable)
-- `mass` (varchar, nullable)
-- `createdAt`, `updatedAt`, `deletedAt`
-
-#### Movies
-- `id` (PK, auto-increment)
-- `title` (varchar, unique)
-- `episode_id` (integer, unique, nullable)
-- `director` (varchar, nullable)
-- `createdAt`, `updatedAt`, `deletedAt`
-
-#### Relación Many-to-Many
-- Tabla: `character_movies`
-- Campos: `character_id`, `movie_id`
-- Un personaje puede aparecer en múltiples películas
-- Una película puede tener múltiples personajes
-
-### Datos Precargados
+**Personajes:**
+- Luke Skywalker (Episodes 4, 5, 6)
+- Darth Vader (Episodes 4, 5, 6, 3)
+- Leia Organa (Episodes 4, 5, 6)
+- Obi-Wan Kenobi (Episodes 4, 1, 2, 3)
+- Anakin Skywalker (Episodes 1, 2, 3)
+- Yoda (Episodes 5, 6, 1, 2, 3)
 
 **Películas:**
 - A New Hope (Episode 4)
@@ -313,62 +430,187 @@ npm run test              # Ejecutar tests
 - Attack of the Clones (Episode 2)
 - Revenge of the Sith (Episode 3)
 
-**Personajes:**
-- Luke Skywalker
-- Darth Vader
-- Leia Organa
-- Obi-Wan Kenobi
-- Anakin Skywalker
-- Yoda
+---
 
-## 🤝 Contribución
+## 🛠️ Tecnologías
 
-1. Fork el proyecto
-2. Crear una rama (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit cambios (`git commit -m 'Agregar nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abrir un Pull Request
+### **Backend Framework**
+- **NestJS** v10 - Framework de Node.js
+- **TypeScript** - Lenguaje de programación
+- **Node.js** - Runtime de JavaScript
 
-## 📄 Licencia
+### **Base de Datos**
+- **PostgreSQL** v15 - Base de datos relacional
+- **TypeORM** - ORM para TypeScript
+- **Docker** - Contenedorización de BD
 
-Este proyecto es para fines educativos - TI-8512 Diseño de Aplicaciones Web.
+### **Validación y Transformación**
+- **class-validator** - Validaciones de DTOs
+- **class-transformer** - Serialización de datos
+- **@nestjs/mapped-types** - Utilities para DTOs
 
-## 👥 Equipo
+### **Documentación**
+- **@nestjs/swagger** - Generación automática de docs
+- **swagger-ui-express** - Interfaz web de Swagger
 
-**Grupo 1 - StarWars API**
-- Proyecto académico
-- Universidad: Tecnológico de Costa Rica
-- Curso: TI-8512 - Diseño de Aplicaciones Web
-- Estudiantes: Luis Jiménez y Valentina Méndez
+### **Herramientas de Desarrollo**
+- **ESLint** - Linting de código
+- **Prettier** - Formateo automático
+- **ts-node** - Ejecución de TypeScript
+- **tsconfig-paths** - Resolución de path aliases
+
+### **DevOps**
+- **Docker Compose** - Orquestación de contenedores
+- **pgAdmin** - Administración de PostgreSQL
 
 ---
 
-**Estado del Proyecto:** ✅ Fase 1 y 2 Completadas
+## 📜 Scripts Disponibles
 
-## 🚀 Próximos Pasos
-
-### Fase 3: Implementación de Módulos CRUD
-- [ ] Módulo Characters con endpoints completos
-- [ ] Módulo Movies con endpoints completos
-- [ ] Controllers, Services, y Repositories
-- [ ] Manejo global de errores
-- [ ] Tests unitarios
-
-### Endpoints a implementar en Fase 3:
+### **Desarrollo**
+```bash
+npm run start:dev         # Ejecutar en modo desarrollo (hot reload)
+npm run start:debug       # Ejecutar en modo debug
+npm run start:prod        # Ejecutar en modo producción
+npm run build             # Compilar proyecto TypeScript
 ```
-Characters:
-GET    /api/v1/characters           # Listar todos
-GET    /api/v1/characters/:id       # Obtener uno
-POST   /api/v1/characters           # Crear
-PUT    /api/v1/characters/:id       # Actualizar
-DELETE /api/v1/characters/:id       # Eliminar
-GET    /api/v1/characters/:id/movies # Películas del personaje
 
-Movies:
-GET    /api/v1/movies               # Listar todas
-GET    /api/v1/movies/:id           # Obtener una
-POST   /api/v1/movies               # Crear
-PUT    /api/v1/movies/:id           # Actualizar
-DELETE /api/v1/movies/:id           # Eliminar
-GET    /api/v1/movies/:id/characters # Personajes de la película
+### **Base de Datos**
+```bash
+npm run migration:run     # Ejecutar migraciones pendientes
+npm run migration:revert  # Revertir última migración
+npm run seed              # Cargar datos de ejemplo
+npm run db:reset          # Reset completo de BD
 ```
+
+### **Docker**
+```bash
+npm run docker:up         # Levantar contenedores (PostgreSQL + pgAdmin)
+npm run docker:down       # Bajar contenedores
+npm run docker:logs       # Ver logs de contenedores
+```
+
+### **Calidad de Código**
+```bash
+npm run lint              # Ejecutar ESLint
+npm run lint:fix          # Corregir issues automáticamente
+npm run format            # Formatear código con Prettier
+npm run test              # Ejecutar tests unitarios
+npm run test:e2e          # Ejecutar tests end-to-end
+npm run test:cov          # Ejecutar tests con coverage
+```
+
+---
+
+## 🧪 Testing
+
+### **Testing Manual con curl**
+```bash
+# Listar todos los personajes
+curl -X GET http://localhost:3000/api/v1/characters
+
+# Crear nuevo personaje
+curl -X POST http://localhost:3000/api/v1/characters \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Han Solo", "height": "180", "movieIds": [1,2,3]}'
+
+# Probar relaciones N:N
+curl -X GET http://localhost:3000/api/v1/characters/1/movies
+curl -X GET http://localhost:3000/api/v1/movies/1/characters
+
+# Probar manejo de errores
+curl -X GET http://localhost:3000/api/v1/characters/999    # 404
+curl -X POST http://localhost:3000/api/v1/characters \
+  -H "Content-Type: application/json" \
+  -d '{"name": "", "movieIds": [999]}'                     # 400
+```
+
+### **Testing con Swagger UI**
+1. Ir a http://localhost:3000/api/v1/docs
+2. Expandir cualquier endpoint
+3. Hacer clic en "Try it out"
+4. Ingresar parámetros de prueba
+5. Ejecutar y ver respuesta
+
+---
+
+## 👨‍💻 Desarrollo
+
+### **Estructura de Carpetas**
+```
+src/
+├── characters/           # Módulo de personajes
+│   ├── dto/             # Data Transfer Objects
+│   ├── entities/        # Entidades TypeORM
+│   ├── characters.controller.ts
+│   ├── characters.service.ts
+│   └── characters.module.ts
+├── movies/              # Módulo de películas
+│   ├── dto/
+│   ├── entities/
+│   ├── movies.controller.ts
+│   ├── movies.service.ts
+│   └── movies.module.ts
+├── common/              # Utilidades compartidas
+│   ├── filters/         # Exception filters
+│   └── pipes/           # Validation pipes
+├── config/              # Configuraciones
+├── database/            # Migraciones y seeds
+└── shared/              # Entidades base
+```
+
+### **Patrones de Desarrollo**
+- **Modular Architecture** - Separación por dominio
+- **Repository Pattern** - Abstracción de acceso a datos
+- **DTO Pattern** - Validación y transformación
+- **Dependency Injection** - Inversión de control
+- **Exception Handling** - Manejo centralizado de errores
+
+### **Convenciones de Código**
+- **CamelCase** para variables y funciones
+- **PascalCase** para clases y interfaces
+- **kebab-case** para nombres de archivos
+- **SCREAMING_SNAKE_CASE** para constantes
+- **Prefijos descriptivos** para métodos (get, create, update, delete)
+
+---
+
+## 📄 Información del Proyecto
+
+### **Contexto Académico**
+- **Universidad:** Tecnológico de Costa Rica
+- **Curso:** TI-8512 - Diseño de Aplicaciones Web
+- **Proyecto:** #3 - API Backend con NestJS
+- **Grupo:** 1 - StarWars API
+
+### **Equipo de Desarrollo**
+- **Estudiantes:** Luis Jiménez y Valentina Méndez
+- **Fecha de Entrega:** Martes 24 de Junio 2025
+- **Profesor:** varguitas
+
+### **Objetivos Cumplidos**
+✅ **Implementación completa de API** con NestJS  
+✅ **Relaciones Many-to-Many** entre Characters y Movies  
+✅ **Manejo profesional de errores HTTP** (404, 400, 403, 409)  
+✅ **Validaciones robustas** con class-validator  
+✅ **Documentación Swagger** completa  
+✅ **Datos de ejemplo** precargados  
+✅ **Arquitectura modular** y escalable  
+
+---
+
+<div align="center">
+
+## 🎯 Estado del Proyecto
+
+**✅ PROYECTO COMPLETADO AL 100%**
+
+*Backend robusto con NestJS - Relaciones N:N - Manejo de errores profesional*
+
+**🚀 Listo para entrega académica**
+
+---
+
+**Made with ❤️ for TI-8512 - Diseño de Aplicaciones Web**
+
+</div>
