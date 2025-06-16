@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { 
+  Injectable, 
+  NotFoundException, 
+  BadRequestException,
+  ForbiddenException,
+  ConflictException 
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Character } from './entities/character.entity';
@@ -18,6 +24,15 @@ export class CharactersService {
   async create(createCharacterDto: CreateCharacterDto): Promise<Character> {
     const { movieIds, ...characterData } = createCharacterDto;
     
+    // Check if character name already exists
+    const existingCharacter = await this.characterRepository.findOne({
+      where: { name: characterData.name },
+    });
+    
+    if (existingCharacter) {
+      throw new ConflictException(`Character with name "${characterData.name}" already exists`);
+    }
+    
     // Create character
     const character = this.characterRepository.create(characterData);
     
@@ -27,7 +42,14 @@ export class CharactersService {
       character.movies = movies;
     }
     
-    return await this.characterRepository.save(character);
+    try {
+      return await this.characterRepository.save(character);
+    } catch (error) {
+      if (error.code === '23505') { // PostgreSQL unique constraint error
+        throw new ConflictException(`Character with name "${characterData.name}" already exists`);
+      }
+      throw error;
+    }
   }
 
   async findAll(): Promise<Character[]> {
@@ -38,6 +60,10 @@ export class CharactersService {
   }
 
   async findOne(id: number): Promise<Character> {
+    if (!id || id < 1) {
+      throw new BadRequestException('Invalid character ID provided');
+    }
+
     const character = await this.characterRepository.findOne({
       where: { id },
       relations: ['movies'],
@@ -55,6 +81,17 @@ export class CharactersService {
     
     const character = await this.findOne(id);
     
+    // Check if new name conflicts with existing character
+    if (characterData.name && characterData.name !== character.name) {
+      const existingCharacter = await this.characterRepository.findOne({
+        where: { name: characterData.name },
+      });
+      
+      if (existingCharacter) {
+        throw new ConflictException(`Character with name "${characterData.name}" already exists`);
+      }
+    }
+    
     // Update basic character data
     Object.assign(character, characterData);
     
@@ -68,11 +105,26 @@ export class CharactersService {
       }
     }
     
-    return await this.characterRepository.save(character);
+    try {
+      return await this.characterRepository.save(character);
+    } catch (error) {
+      if (error.code === '23505') {
+        throw new ConflictException(`Character with name "${characterData.name}" already exists`);
+      }
+      throw error;
+    }
   }
 
   async remove(id: number): Promise<void> {
     const character = await this.findOne(id);
+    
+    // Check if character has movie relationships
+    if (character.movies && character.movies.length > 0) {
+      throw new ForbiddenException(
+        `Cannot delete character "${character.name}" because it is associated with ${character.movies.length} movie(s). Remove the associations first.`
+      );
+    }
+    
     await this.characterRepository.remove(character);
   }
 
@@ -82,13 +134,21 @@ export class CharactersService {
   }
 
   async addMovieToCharacter(characterId: number, movieId: number): Promise<Character> {
+    if (!characterId || characterId < 1) {
+      throw new BadRequestException('Invalid character ID provided');
+    }
+    
+    if (!movieId || movieId < 1) {
+      throw new BadRequestException('Invalid movie ID provided');
+    }
+
     const character = await this.findOne(characterId);
     const movie = await this.validateMoviesExist([movieId]);
     
     // Check if relationship already exists
     const existingMovie = character.movies.find(m => m.id === movieId);
     if (existingMovie) {
-      throw new BadRequestException(`Character is already in movie with ID ${movieId}`);
+      throw new BadRequestException(`Character "${character.name}" is already associated with movie "${movie[0].title}"`);
     }
     
     character.movies.push(movie[0]);
@@ -96,11 +156,19 @@ export class CharactersService {
   }
 
   async removeMovieFromCharacter(characterId: number, movieId: number): Promise<Character> {
+    if (!characterId || characterId < 1) {
+      throw new BadRequestException('Invalid character ID provided');
+    }
+    
+    if (!movieId || movieId < 1) {
+      throw new BadRequestException('Invalid movie ID provided');
+    }
+
     const character = await this.findOne(characterId);
     
     const movieIndex = character.movies.findIndex(m => m.id === movieId);
     if (movieIndex === -1) {
-      throw new NotFoundException(`Character is not associated with movie ID ${movieId}`);
+      throw new NotFoundException(`Character "${character.name}" is not associated with movie ID ${movieId}`);
     }
     
     character.movies.splice(movieIndex, 1);
@@ -108,6 +176,16 @@ export class CharactersService {
   }
 
   private async validateMoviesExist(movieIds: number[]): Promise<Movie[]> {
+    if (!movieIds || movieIds.length === 0) {
+      return [];
+    }
+
+    // Check for invalid IDs
+    const invalidIds = movieIds.filter(id => !id || id < 1);
+    if (invalidIds.length > 0) {
+      throw new BadRequestException(`Invalid movie IDs provided: ${invalidIds.join(', ')}`);
+    }
+
     const movies = await this.movieRepository.find({
       where: { id: In(movieIds) },
     });
